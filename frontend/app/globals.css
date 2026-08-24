@@ -1,0 +1,161 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  background: #07111f;
+  color: #ffffff;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: #07111f;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #07111f;
+  color: #ffffff;
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+}
+
+/* ============================================================
+   SCROLLBARS
+============================================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #07111f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #26364a;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a4d65;
+}
+
+
+/* ============================================================
+   RANGE SLIDERS
+============================================================ */
+
+input[type="range"] {
+  appearance: none;
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background: #243448;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #4c9aff;
+  cursor: pointer;
+  border: 2px solid #07111f;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #4c9aff;
+  cursor: pointer;
+  border: 2px solid #07111f;
+}
+
+
+/* ============================================================
+   CHECKBOXES
+============================================================ */
+
+input[type="checkbox"] {
+  accent-color: #4c9aff;
+}
+
+
+/* ============================================================
+   SELECTS
+============================================================ */
+
+select {
+  color-scheme: dark;
+}
+
+select option {
+  background: #0c1928;
+  color: #ffffff;
+}
+
+
+/* ============================================================
+   TABLES
+============================================================ */
+
+table {
+  border-collapse: collapse;
+}
+
+
+/* ============================================================
+   PLOTLY
+============================================================ */
+
+.js-plotly-plot,
+.plot-container {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.js-plotly-plot .plotly,
+.js-plotly-plot .main-svg {
+  max-width: 100%;
+}
+
+.js-plotly-plot .modebar {
+  opacity: 0.55;
+}
+
+.js-plotly-plot .modebar:hover {
+  opacity: 1;
+}
+
+
+/* ============================================================
+   FOCUS
+============================================================ */
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 1px solid rgba(34, 211, 238, 0.6);
+  outline-offset: 2px;
+}
+
+
+/* ============================================================
+   SELECTION
+============================================================ */
+
+::selection {
+  background: rgba(34, 211, 238, 0.25);
+  color: #ffffff;
+}
