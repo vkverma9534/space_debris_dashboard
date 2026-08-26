@@ -1,3 +1,5 @@
+import os
+import requests
 import pandas as pd
 import numpy as np
 
@@ -40,7 +42,66 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-master_df, missing_files = load_data()
+DATA_DIR = "/tmp/data" if os.environ.get("VERCEL") else "backend/data"
+os.makedirs(DATA_DIR, exist_ok=True)
+
+TLE_DATASETS = {
+    "active_satellites.csv": "active",
+    "active_space_station.csv": "stations",
+    "starlink.csv": "starlink",
+    "oneweb.csv": "oneweb",
+    "kuiper.csv": "kuiper",
+    "Chinese_ASAT_Test_Debris.csv": "fengyun-1c-debris",
+    "IRIDIUM_33_Debris.csv": "iridium-33-debris",
+    "COSMOS_2251_Debris.csv": "cosmos-2251-debris"
+}
+
+# Global states initialized safely as empty to prevent import/loading order crashes
+master_df = pd.DataFrame()
+missing_files = []
+
+@app.on_event("startup")
+def startup_event():
+    """
+    Safely fetch live TLE data on startup before any requests arrive. 
+    If fetching fails, it falls back to local files without breaking.
+    """
+    global master_df, missing_files
+    print("Initializing satellite and debris datasets...")
+    
+    try:
+        for filename, group_name in TLE_DATASETS.items():
+            url = f"https://celestrak.org/NORAD/elements/gp.php?GROUP={group_name}&FORMAT=csv"
+            file_path = os.path.join(DATA_DIR, filename)
+            
+            response = requests.get(url, timeout=15)
+            if response.status_code == 200:
+                with open(file_path, "w", encoding="utf-8") as f:
+                    f.write(response.text)
+    except Exception as e:
+        print(f"Warning: Could not refresh TLE data from web ({e}). Using existing fallback files.")
+            
+    master_df, missing_files = load_data()
+    print(f"Startup complete. Loaded {len(master_df)} orbital records.")
+
+@app.get("/api/cron/update-tle")
+def update_tle_csvs():
+    global master_df, missing_files
+    
+    for filename, group_name in TLE_DATASETS.items():
+        url = f"https://celestrak.org/NORAD/elements/gp.php?GROUP={group_name}&FORMAT=csv"
+        file_path = os.path.join(DATA_DIR, filename)
+        
+        try:
+            response = requests.get(url, timeout=30)
+            if response.status_code == 200:
+                with open(file_path, "w", encoding="utf-8") as f:
+                    f.write(response.text)
+        except Exception:
+            pass
+            
+    master_df, missing_files = load_data()
+    return {"status": "success"}
 
 class DashboardRequest(BaseModel):
     categories: list[str] | None = None

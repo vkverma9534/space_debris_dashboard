@@ -1,14 +1,21 @@
 {
+  "version": 2,
   "builds": [
     {
-      "src": "main.py",
+      "src": "backend/main.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "main.py"
+      "dest": "backend/main.py"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/update-tle",
+      "schedule": "0 */2 * * *"
     }
   ]
 }
