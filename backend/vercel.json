@@ -11,11 +11,5 @@
       "src": "/(.*)",
       "dest": "backend/main.py"
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/cron/update-tle",
-      "schedule": "0 */2 * * *"
-    }
   ]
 }

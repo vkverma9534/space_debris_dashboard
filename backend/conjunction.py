@@ -37,6 +37,8 @@ def find_conjunctions(
 
     alerts = []
 
+    iss_keywords = ["ISS", "ZARYA", "UNITY", "ZVEZDA", "DESTINY", "POISK", "RASSVET"]
+
     for i in range(len(coords)):
         differences = (
             coords[i + 1:]
@@ -62,7 +64,10 @@ def find_conjunctions(
                 + relative_index
             )
 
-            if "ISS" in names[i] and "ISS" in names[j]:
+            is_a_iss = any(kw in str(names[i]).upper() for kw in iss_keywords)
+            is_b_iss = any(kw in str(names[j]).upper() for kw in iss_keywords)
+
+            if is_a_iss and is_b_iss:
                 continue
 
             distance = float(
