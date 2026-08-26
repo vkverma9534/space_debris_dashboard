@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 
@@ -5,16 +6,17 @@ import pandas as pd
 EARTH_RADIUS_KM = 6378.137
 EARTH_MU_KM3_S2 = 398600.4418
 
+DATA_DIR = "/tmp/data" if os.environ.get("VERCEL") else "backend/data"
 
 DATASETS = {
-    "Active Satellite": "data/active_satellites.csv",
-    "Space Station": "data/active_space_station.csv",
-    "Starlink": "data/starlink.csv",
-    "OneWeb": "data/oneweb.csv",
-    "Kuiper": "data/kuiper.csv",
-    "Debris - Chinese ASAT": "data/Chinese_ASAT_Test_Debris.csv",
-    "Debris - Iridium 33": "data/IRIDIUM_33_Debris.csv",
-    "Debris - Cosmos 2251": "data/COSMOS_2251_Debris.csv",
+    "Active Satellite": os.path.join(DATA_DIR, "active_satellites.csv"),
+    "Space Station": os.path.join(DATA_DIR, "active_space_station.csv"),
+    "Starlink": os.path.join(DATA_DIR, "starlink.csv"),
+    "OneWeb": os.path.join(DATA_DIR, "oneweb.csv"),
+    "Kuiper": os.path.join(DATA_DIR, "kuiper.csv"),
+    "Debris - Chinese ASAT": os.path.join(DATA_DIR, "Chinese_ASAT_Test_Debris.csv"),
+    "Debris - Iridium 33": os.path.join(DATA_DIR, "IRIDIUM_33_Debris.csv"),
+    "Debris - Cosmos 2251": os.path.join(DATA_DIR, "COSMOS_2251_Debris.csv"),
 }
 
 

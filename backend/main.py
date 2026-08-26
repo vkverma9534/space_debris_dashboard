@@ -56,30 +56,29 @@ TLE_DATASETS = {
     "COSMOS_2251_Debris.csv": "cosmos-2251-debris"
 }
 
-# Global states initialized safely as empty to prevent import/loading order crashes
 master_df = pd.DataFrame()
 missing_files = []
 
 @app.on_event("startup")
 def startup_event():
-    """
-    Safely fetch live TLE data on startup before any requests arrive. 
-    If fetching fails, it falls back to local files without breaking.
-    """
     global master_df, missing_files
     print("Initializing satellite and debris datasets...")
     
-    try:
-        for filename, group_name in TLE_DATASETS.items():
+    # Non-blocking check: only attempt download if local file is missing/empty, 
+    # and use a short 5-second timeout to fast-fail if network is restricted.
+    for filename, group_name in TLE_DATASETS.items():
+        file_path = os.path.join(DATA_DIR, filename)
+        
+        if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
             url = f"https://celestrak.org/NORAD/elements/gp.php?GROUP={group_name}&FORMAT=csv"
-            file_path = os.path.join(DATA_DIR, filename)
-            
-            response = requests.get(url, timeout=15)
-            if response.status_code == 200:
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(response.text)
-    except Exception as e:
-        print(f"Warning: Could not refresh TLE data from web ({e}). Using existing fallback files.")
+            try:
+                print(f"Attempting to download {filename}...")
+                response = requests.get(url, timeout=5)
+                if response.status_code == 200:
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        f.write(response.text)
+            except Exception:
+                print(f"Skipping download for {filename} (network restricted). Using local fallback.")
             
     master_df, missing_files = load_data()
     print(f"Startup complete. Loaded {len(master_df)} orbital records.")
@@ -93,7 +92,7 @@ def update_tle_csvs():
         file_path = os.path.join(DATA_DIR, filename)
         
         try:
-            response = requests.get(url, timeout=30)
+            response = requests.get(url, timeout=10)
             if response.status_code == 200:
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(response.text)
@@ -125,11 +124,6 @@ class DashboardRequest(BaseModel):
     )
 
 def make_json_safe(value):
-    """
-    Convert pandas / NumPy values into standard
-    Python values that FastAPI can serialize to JSON.
-    """
-
     if isinstance(value, dict):
         return {
             key: make_json_safe(val)
@@ -169,10 +163,6 @@ def make_json_safe(value):
     return value
 
 def dataframe_records(df):
-    """
-    Convert a pandas DataFrame into JSON-safe records.
-    """
-
     if df.empty:
         return []
 
@@ -190,10 +180,6 @@ def dataframe_records(df):
     return make_json_safe(records)
 
 def get_orbital_objects(df):
-    """
-    Return the orbital columns needed by the frontend.
-    """
-
     columns = [
         "OBJECT_NAME",
         "CATEGORY",
@@ -244,11 +230,6 @@ def get_orbital_objects(df):
     return result
 
 def get_density_points(df):
-    """
-    Prepare altitude/inclination points for
-    the frontend density heatmap.
-    """
-
     density_df = df[
         df["APPROX_ALTITUDE"].between(
             150,
@@ -284,11 +265,6 @@ def get_density_points(df):
     )
 
 def get_debris_altitude(df):
-    """
-    Calculate debris distribution
-    across altitude bands.
-    """
-
     debris_df = df[
         df["CATEGORY"].str.contains(
             "Debris",
@@ -336,10 +312,6 @@ def get_debris_altitude(df):
     )
 
 def get_debris_sources(df):
-    """
-    Calculate debris counts by source.
-    """
-
     debris_df = df[
         df["CATEGORY"].str.contains(
             "Debris",
@@ -394,7 +366,6 @@ def health():
 
 @app.get("/api/categories")
 def categories():
-
     if master_df.empty:
         return {
             "categories": []
@@ -415,10 +386,6 @@ def categories():
 def dashboard(
     request: DashboardRequest,
 ):
-    """
-    Build the complete dashboard dataset.
-    """
-
     if master_df.empty:
         raise HTTPException(
             status_code=500,
@@ -536,10 +503,6 @@ def dashboard(
 def orbital_positions(
     request: DashboardRequest,
 ):
-    """
-    Generate positions for the 3D orbital view.
-    """
-
     if master_df.empty:
         raise HTTPException(
             status_code=500,
@@ -575,10 +538,6 @@ def orbital_positions(
 def catalog(
     limit: int = 200,
 ):
-    """
-    Return catalog records.
-    """
-
     if master_df.empty:
         return {
             "objects": [],
