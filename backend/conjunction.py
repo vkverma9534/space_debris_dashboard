@@ -9,11 +9,6 @@ def find_conjunctions(
     threshold,
     maximum_objects=700,
 ):
-    """
-    Find pairs of objects whose simulated separation
-    is below the configured threshold.
-    """
-
     if position_df.empty:
         return pd.DataFrame()
 
@@ -67,6 +62,9 @@ def find_conjunctions(
                 + relative_index
             )
 
+            if "ISS" in names[i] and "ISS" in names[j]:
+                continue
+
             distance = float(
                 distances[
                     relative_index
@@ -111,8 +109,6 @@ def find_conjunctions(
 def calculate_risk_summary(
     conjunctions_df,
 ):
-    """Return summary counts for the dashboard."""
-
     if conjunctions_df.empty:
         return {
             "high": 0,
@@ -153,8 +149,6 @@ def get_closest_approaches(
     conjunctions_df,
     limit=12,
 ):
-    """Return the closest simulated approaches."""
-
     if conjunctions_df.empty:
         return []
 
