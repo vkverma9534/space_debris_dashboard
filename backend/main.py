@@ -433,8 +433,7 @@ def dashboard(
 
     closest_approaches = (
         get_closest_approaches(
-            conjunctions_df,
-            limit=12,
+            conjunctions_df
         )
     )
 

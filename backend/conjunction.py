@@ -64,17 +64,15 @@ def find_conjunctions(
                 + relative_index
             )
 
+            distance = float(distances[relative_index])
+            if distance < 0.005:
+                continue
+
             is_a_iss = any(kw in str(names[i]).upper() for kw in iss_keywords)
             is_b_iss = any(kw in str(names[j]).upper() for kw in iss_keywords)
 
             if is_a_iss and is_b_iss:
                 continue
-
-            distance = float(
-                distances[
-                    relative_index
-                ]
-            )
 
             alerts.append(
                 {
@@ -152,7 +150,7 @@ def calculate_risk_summary(
 
 def get_closest_approaches(
     conjunctions_df,
-    limit=12,
+    limit=50,
 ):
     if conjunctions_df.empty:
         return []
