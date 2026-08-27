@@ -48,9 +48,15 @@ The tracked CSV files under `backend/backend/data` are the initial fallback cata
 
 The backend loads the packaged catalog immediately, then attempts a background refresh. This means the service can answer health and dashboard requests without waiting for an upstream timeout. The footer reports whether the active data is live or fallback data.
 
+The backend is pinned to Python 3.12.8 in `backend/runtime.txt`. This matches the pinned NumPy and Pandas versions. If Render reports Python 3.14 and starts building Pandas from source, add `PYTHON_VERSION` as described below, save the environment variables, and deploy again.
+
 ### 3. Configure backend CORS
 
-In the Render service environment variables, add:
+In the Render service environment variables, add both variables:
+
+```text
+PYTHON_VERSION=3.12.8
+```
 
 ```text
 FRONTEND_URLS=https://your-project.vercel.app
