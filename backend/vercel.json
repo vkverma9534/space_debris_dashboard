@@ -1,14 +1,15 @@
 {
   "version": 2,
-  "services": {
-    "frontend": {
-      "framework": "nextjs",
-      "routePrefix": "/"
-    },
-    "backend": {
-      "framework": "fastapi",
-      "entrypoint": "backend/main.py",
-      "routePrefix": "/api"
+  "builds": [
+    {
+      "src": "backend/main.py",
+      "use": "@vercel/python"
     }
-  }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/backend/main.py"
+    }
+  ]
 }
