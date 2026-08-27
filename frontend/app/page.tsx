@@ -155,10 +155,32 @@ export default function Home() {
   const [error, setError] =
     useState<string | null>(null);
 
+  const [downloading, setDownloading] =
+    useState(false);
+
+  const [dataSourceStatus, setDataSourceStatus] =
+    useState("unknown");
+
 
   useEffect(() => {
     loadCategories();
   }, []);
+
+
+  useEffect(() => {
+    if (dataSourceStatus !== "refreshing") {
+      return;
+    }
+
+    const interval = window.setInterval(
+      loadCategories,
+      3000
+    );
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [dataSourceStatus]);
 
 
   useEffect(() => {
@@ -205,6 +227,12 @@ export default function Home() {
 
       setSelectedCategories(
         loadedCategories
+      );
+
+      setDataSourceStatus(
+        typeof result.data_source === "string"
+          ? result.data_source
+          : "unknown"
       );
 
       if (
@@ -336,6 +364,53 @@ export default function Home() {
         "Unable to load orbital positions:",
         error
       );
+    }
+  }
+
+
+  async function downloadFreshCatalog() {
+    try {
+      setDownloading(true);
+      setError(null);
+
+      const response = await fetch(
+        `${API_URL}/api/catalog/download`
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Fresh catalog download failed"
+        );
+      }
+
+      const blob = await response.blob();
+      setDataSourceStatus(
+        response.headers.get("X-Catalog-Source") ||
+          "live"
+      );
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "space-debris-catalog.csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      await loadCategories();
+    } catch (error) {
+      console.error(
+        "Unable to download fresh catalog:",
+        error
+      );
+
+      setError(
+        "Fresh download unavailable. No CSV was generated."
+      );
+      setDataSourceStatus("unavailable");
+    } finally {
+      setDownloading(false);
     }
   }
 
@@ -871,11 +946,24 @@ export default function Home() {
 
             <section>
 
-              <SectionHeading
-                eyebrow="Catalog"
-                title="Catalog Explorer"
-                description="Search and explore tracked orbital objects."
-              />
+              <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <SectionHeading
+                  eyebrow="Catalog"
+                  title="Catalog Explorer"
+                  description="Search and explore tracked orbital objects."
+                />
+
+                <button
+                  type="button"
+                  onClick={downloadFreshCatalog}
+                  disabled={downloading}
+                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-4 py-2.5 text-xs font-semibold text-cyan-200 transition hover:bg-cyan-400/20 disabled:cursor-wait disabled:opacity-60"
+                >
+                  {downloading
+                    ? "Refreshing catalog..."
+                    : "Download fresh CSV"}
+                </button>
+              </div>
 
               <CatalogExplorer
                 objects={
@@ -892,6 +980,30 @@ export default function Home() {
 
 
                 <div className="max-w-3xl">
+
+                  <div className="mb-4 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-slate-500">
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        dataSourceStatus === "live"
+                          ? "bg-emerald-400"
+                          : dataSourceStatus === "fallback"
+                            ? "bg-amber-400"
+                            : dataSourceStatus === "unavailable"
+                              ? "bg-red-400"
+                              : "bg-slate-500"
+                      }`}
+                    />
+
+                    {dataSourceStatus === "live"
+                      ? "Data source: live download"
+                      : dataSourceStatus === "fallback"
+                        ? "Data source: local fallback"
+                        : dataSourceStatus === "unavailable"
+                          ? "Data source: unavailable"
+                            : dataSourceStatus === "refreshing"
+                              ? "Data source: downloading fresh data"
+                          : "Data source: checking"}
+                  </div>
 
                   <div className="flex flex-wrap items-center gap-2">
 
