@@ -6,7 +6,8 @@ import pandas as pd
 EARTH_RADIUS_KM = 6378.137
 EARTH_MU_KM3_S2 = 398600.4418
 
-DATA_DIR = "/tmp/data" if os.environ.get("VERCEL") else "backend/data"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "backend", "data")
 
 DATASETS = {
     "Active Satellite": os.path.join(DATA_DIR, "active_satellites.csv"),

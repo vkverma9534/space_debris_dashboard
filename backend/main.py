@@ -42,7 +42,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DATA_DIR = "/tmp/data" if os.environ.get("VERCEL") else "backend/data"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+if os.environ.get("VERCEL"):
+    DATA_DIR = "/tmp/data"
+else:
+    DATA_DIR = os.path.join(BASE_DIR, "backend", "data")
+
 os.makedirs(DATA_DIR, exist_ok=True)
 
 TLE_DATASETS = {
