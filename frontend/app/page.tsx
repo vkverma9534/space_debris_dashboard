@@ -824,6 +824,35 @@ export default function Home() {
             <section>
 
               <SectionHeading
+                eyebrow="Safety"
+                title="Collision Risk"
+                description="Simulated conjunction screening and collision-risk indicators."
+              />
+
+              <div className="space-y-6">
+
+                <CollisionRisk
+                  summary={
+                    data.risk_summary
+                  }
+                  approaches={
+                    data.closest_approaches
+                  }
+                  thresholdKm={
+                    thresholdKm
+                  }
+                />
+
+                <RiskFactors />
+
+              </div>
+
+            </section>
+
+
+            <section>
+
+              <SectionHeading
                 eyebrow="Overview"
                 title="Orbital Population"
                 description="Current catalog population and filtered object counts."
@@ -857,35 +886,6 @@ export default function Home() {
                     data.density_points
                   }
                 />
-
-              </div>
-
-            </section>
-
-
-            <section>
-
-              <SectionHeading
-                eyebrow="Safety"
-                title="Collision Risk"
-                description="Simulated conjunction screening and collision-risk indicators."
-              />
-
-              <div className="space-y-6">
-
-                <CollisionRisk
-                  summary={
-                    data.risk_summary
-                  }
-                  approaches={
-                    data.closest_approaches
-                  }
-                  thresholdKm={
-                    thresholdKm
-                  }
-                />
-
-                <RiskFactors />
 
               </div>
 
